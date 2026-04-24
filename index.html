@@ -774,6 +774,8 @@ function App(){
   const[ags,setAgs]=useState([]);
   const[tab,setTab]=useState("agenda");
   const[syncing,setSyncing]=useState(false);
+  const[saveErr,setSaveErr]=useState("");
+  const[showIds,setShowIds]=useState(false);
 
   useEffect(()=>{
     const stored=localStorage.getItem(BIN_IDS_KEY);
@@ -796,8 +798,22 @@ function App(){
     return()=>clearInterval(iv);
   },[ready,binIds]);
 
-  const savPs=async novo=>{setPs(novo);try{await updateBin(binIds.prestadores,novo);}catch{}};
-  const savAgs=async novo=>{setAgs(novo);try{await updateBin(binIds.agendamentos,novo);}catch{}};
+  const savPs=async novo=>{
+    setPs(novo);
+    try{
+      const r=await updateBin(binIds.prestadores,novo);
+      if(r.error){setSaveErr("Erro ao salvar prestador: "+r.message);return;}
+      setSaveErr("");
+    }catch(e){setSaveErr("Falha de conexão ao salvar. Tente novamente.");}
+  };
+  const savAgs=async novo=>{
+    setAgs(novo);
+    try{
+      const r=await updateBin(binIds.agendamentos,novo);
+      if(r.error){setSaveErr("Erro ao salvar agendamento: "+r.message);return;}
+      setSaveErr("");
+    }catch(e){setSaveErr("Falha de conexão ao salvar. Tente novamente.");}
+  };
   const addAg=async a=>{const novo=[...ags,a];await savAgs(novo);};
   const updAg=async u=>{await savAgs(ags.map(a=>a.id===u.id?u:a));};
 
@@ -813,10 +829,23 @@ function App(){
       h("div",{style:{display:"flex",alignItems:"center",gap:12}},
         syncing&&h("div",{style:{display:"flex",alignItems:"center",gap:6,fontSize:12,opacity:.7}},h("div",{className:"spinner"}),"Sincronizando..."),
         h("span",{className:"hdr-sub"},"Agenda Prestadores de Excelência"),
+        h("button",{style:{background:"rgba(255,255,255,.15)",border:"none",color:"white",fontSize:12,padding:"4px 10px",borderRadius:6,cursor:"pointer",marginRight:4},onClick:()=>setShowIds(!showIds)},"🔑 IDs"),
         h("button",{style:{background:"rgba(255,255,255,.15)",border:"none",color:"white",fontSize:12,padding:"4px 10px",borderRadius:6,cursor:"pointer"},onClick:()=>{localStorage.removeItem(BIN_IDS_KEY);window.location.reload();}},"Sair")
       )
     ),
     h("nav",{className:"nav-bar"},TABS.map(t=>h("button",{key:t.k,className:`nb${tab===t.k?" on":""}`,onClick:()=>setTab(t.k)},t.l))),
+    saveErr&&h("div",{style:{background:"#fef2f2",color:"#991b1b",padding:"10px 24px",fontSize:13,borderBottom:"1px solid #fca5a5",display:"flex",alignItems:"center",justifyContent:"space-between"}},
+      h("span",null,"⚠ "+saveErr),
+      h("button",{style:{background:"none",border:"none",color:"#991b1b",cursor:"pointer",fontSize:13,padding:0},onClick:()=>setSaveErr("")},"✕")
+    ),
+    showIds&&h("div",{style:{background:"#fffbeb",borderBottom:"1px solid #fcd34d",padding:"12px 24px"}},
+      h("div",{style:{fontSize:12,fontWeight:600,color:"#92400e",marginBottom:6}},"IDs do banco de dados — compartilhe com o time:"),
+      h("div",{style:{fontFamily:"monospace",fontSize:12,background:"white",border:"1px solid #fcd34d",borderRadius:6,padding:"8px 12px",wordBreak:"break-all",marginBottom:8}},JSON.stringify(binIds,null,2)),
+      h("div",{style:{display:"flex",gap:8}},
+        h("button",{style:{fontSize:12,padding:"4px 10px"},onClick:()=>{navigator.clipboard?.writeText(JSON.stringify(binIds))}},"📋 Copiar"),
+        h("button",{style:{fontSize:12,padding:"4px 10px"},onClick:()=>setShowIds(false)},"Fechar")
+      )
+    ),
     h("div",{className:"body"},
       tab==="agenda"&&h(AgendaTab,{ps,ags,onSave:addAg}),
       tab==="prest"&&h(PrestTab,{ps,ags,onSave:savPs}),
