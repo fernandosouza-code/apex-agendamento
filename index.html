@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cobli APEX</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#0f172a;background:#f1f5f9;min-height:100vh}
+.hdr{background:#1a3fa8;color:white;padding:13px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.hdr-logo{font-size:17px;font-weight:700;display:flex;align-items:center;gap:10px}
+.hdr-tag{font-size:10px;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:4px;letter-spacing:1px;font-weight:600}
+.hdr-sub{font-size:12px;opacity:.7}
+.nav-bar{background:#0e2770;display:flex;padding:0 24px}
+.nb{padding:11px 18px;border:none;background:none;color:rgba(255,255,255,.5);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.nb:hover{color:rgba(255,255,255,.85)}
+.nb.on{color:white;border-bottom-color:#60a5fa}
+.body{padding:24px;max-width:900px;margin:0 auto}
+.ptitle{font-size:20px;font-weight:700;margin-bottom:4px}
+.psub{font-size:13px;color:#64748b;margin-bottom:24px}
+.card{background:white;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:14px}
+.ch{padding:14px 20px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between}
+.ct{font-size:15px;font-weight:600}
+.cb{padding:20px}
+button{padding:8px 16px;border-radius:8px;border:1px solid #cbd5e1;background:white;color:#0f172a;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+button:hover{background:#f8fafc}
+button:active{transform:scale(.98)}
+button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.bp{background:#1a3fa8;border-color:#1a3fa8;color:white}
+.bp:hover{background:#2e56cc}
+.bs{background:#059669;border-color:#059669;color:white}
+.bs:hover{background:#047857}
+.bd{color:#991b1b;border-color:#fca5a5}
+.bd:hover{background:#fee2e2}
+.bsm{padding:4px 10px;font-size:12px}
+input,select{width:100%;padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;background:white;color:#0f172a;font-family:inherit;font-size:14px;outline:none;transition:border-color .15s}
+input:focus,select:focus{border-color:#1a3fa8;box-shadow:0 0 0 3px rgba(26,63,168,.1)}
+input.err{border-color:#ef4444}
+input[type=number]{-moz-appearance:textfield}
+.lbl{display:block;font-size:11px;font-weight:600;color:#64748b;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.fld{margin-bottom:16px}
+.ferr{font-size:12px;color:#dc2626;margin-top:4px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cspan{grid-column:1/-1}
+.div{height:1px;background:#e2e8f0;margin:18px 0}
+.row{display:flex;gap:8px;align-items:center}
+select{cursor:pointer}
+.progress{display:flex;align-items:flex-start;margin-bottom:28px}
+.pstep{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;position:relative}
+.pstep:not(:last-child)::after{content:"";position:absolute;top:16px;left:calc(50% + 18px);right:calc(-50% + 18px);height:2px;background:#e2e8f0}
+.pstep.done::after{background:#1a3fa8}
+.pdot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;z-index:1;position:relative;background:white;border:2px solid #cbd5e1;color:#94a3b8}
+.pdot.on{background:#1a3fa8;border-color:#1a3fa8;color:white}
+.pdot.done{background:#059669;border-color:#059669;color:white}
+.plbl{font-size:11px;font-weight:500;color:#94a3b8;text-align:center;white-space:nowrap}
+.plbl.on{color:#1a3fa8;font-weight:600}
+.plbl.done{color:#059669}
+.dia-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:16px}
+.dia-btn{padding:9px 4px;border-radius:8px;border:1px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:500;cursor:pointer;text-align:center;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:3px}
+.dia-btn:hover{border-color:#1a3fa8;color:#1a3fa8}
+.dia-btn.on{background:#eff6ff;border-color:#1a3fa8;color:#1a3fa8;border-width:2px}
+.dia-count{font-size:10px;color:#94a3b8}
+.dia-btn.on .dia-count{color:#60a5fa}
+.hora-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.hora-btn{padding:8px 4px;border-radius:8px;border:1px solid #e2e8f0;background:white;font-size:12px;font-weight:500;cursor:pointer;text-align:center;transition:all .15s;font-family:monospace;color:#0f172a}
+.hora-btn:hover{border-color:#1a3fa8;color:#1a3fa8}
+.hora-btn.on{background:#eff6ff;border-color:#1a3fa8;color:#1a3fa8;border-width:2px}
+.spinner{width:14px;height:14px;border:2px solid #e2e8f0;border-top-color:#1a3fa8;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+.spinner-lg{width:32px;height:32px;border:3px solid #e2e8f0;border-top-color:#1a3fa8;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.geo-ok{display:flex;align-items:center;gap:8px;background:#f0fdf4;color:#166534;border:1px solid #86efac;border-radius:8px;padding:9px 13px;font-size:13px;margin-top:10px}
+.geo-err{display:flex;align-items:center;gap:8px;background:#fef2f2;color:#991b1b;border:1px solid #fca5a5;border-radius:8px;padding:9px 13px;font-size:13px;margin-top:10px}
+.coord-hint{font-size:12px;color:#94a3b8;margin-top:8px;line-height:1.5}
+.raio-row{display:flex;align-items:center;gap:12px;margin-top:6px}
+input[type=range]{padding:0;border:none;background:transparent;box-shadow:none;cursor:pointer}
+input[type=range]:focus{border-color:transparent;box-shadow:none}
+.slot-chip{display:inline-flex;align-items:center;background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;border-radius:4px;padding:2px 7px;font-size:12px;font-family:monospace;margin:2px;font-weight:500}
+.slot-row{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;border:1px solid #f1f5f9;border-radius:8px;margin-bottom:6px;background:#f8fafc}
+.rev-section{margin-bottom:18px}
+.rev-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#64748b;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid #e2e8f0}
+.rev-row{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;font-size:13px;border-bottom:1px solid #f1f5f9}
+.rev-row:last-child{border-bottom:none}
+.rev-key{color:#64748b}
+.rev-val{font-weight:600;text-align:right;max-width:60%}
+.rev-val.mono{font-family:monospace;font-size:12px}
+.pc{background:white;border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;transition:border-color .15s}
+.pc:hover{border-color:#94a3b8}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.bsp{background:#eff6ff;color:#1e40af}
+.brj{background:#f0fdf4;color:#166534}
+.bgeo{background:#f0fdf4;color:#166534}
+.btel{background:#eff6ff;color:#1e40af}
+.bidf{background:#f0fdf4;color:#166534}
+.btrv{background:#fffbeb;color:#92400e}
+.bvid{background:#fdf4ff;color:#6b21a8}
+.alert{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;border:1px solid}
+.aerr{background:#fef2f2;color:#991b1b;border-color:#fca5a5}
+.aok{background:#f0fdf4;color:#166534;border-color:#86efac}
+.ainfo{background:#eff6ff;color:#1e40af;border-color:#bfdbfe}
+.awarn{background:#fffbeb;color:#92400e;border-color:#fcd34d}
+.footer-btns{display:flex;justify-content:space-between;align-items:center;margin-top:22px;padding-top:18px;border-top:1px solid #e2e8f0}
+.empty{text-align:center;padding:48px 24px;color:#64748b}
+.empty-icon{font-size:36px;margin-bottom:12px}
+.prod-row{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;background:#fafafa}
+.prod-name{font-size:13px;font-weight:500}
+.prod-cat{font-size:11px;color:#64748b;margin-top:2px}
+.prod-time{font-family:monospace;font-size:12px;color:#1a3fa8;font-weight:600;white-space:nowrap}
+.qty-input{width:60px;text-align:center;padding:5px 8px;font-size:14px}
+.add-prod-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin-bottom:12px}
+.tec-card{border:1px solid #e2e8f0;border-radius:10px;padding:14px;margin-bottom:10px}
+.tec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.tec-title{font-size:14px;font-weight:600}
+.tec-pct{font-size:13px;font-weight:600;color:#1a3fa8;font-family:monospace}
+.progress-bar{height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin-bottom:10px}
+.progress-fill{height:100%;background:#1a3fa8;border-radius:3px;transition:width .3s}
+.progress-fill.warn{background:#f59e0b}
+.progress-fill.full{background:#ef4444}
+.ag-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:13px}
+.ag-item:last-child{border-bottom:none}
+.ag-time{font-family:monospace;font-weight:600;color:#1a3fa8;white-space:nowrap;min-width:45px}
+.ag-info{flex:1;min-width:0}
+.ag-client{font-weight:500}
+.ag-detail{color:#64748b;font-size:12px;margin-top:2px}
+.tempo-box{background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px 16px;margin-bottom:14px}
+.tempo-total{font-size:22px;font-weight:700;color:#166534;font-family:monospace}
+.slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+.scard{border:1px solid #e2e8f0;border-radius:8px;padding:10px;cursor:pointer;text-align:center;transition:all .15s}
+.scard:hover{border-color:#1a3fa8;background:#f8fafc}
+.scard.sel{border:2px solid #1a3fa8;background:#eff6ff}
+.scard.full{opacity:.4;cursor:not-allowed;background:#f8fafc}
+.sd{font-size:12px;font-weight:500;margin-bottom:2px}
+.sdy{font-size:11px;color:#64748b;margin-bottom:5px}
+.sh{font-size:16px;font-weight:700;font-family:monospace;color:#1a3fa8}
+.sc{font-size:10px;color:#64748b;margin-top:3px}
+.tec-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;background:#f0fdf4;color:#166534}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:9px 13px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:#64748b;border-bottom:1px solid #e2e8f0}
+td{padding:10px 13px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#f8fafc}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:white;border:1px solid #e2e8f0;border-radius:10px;padding:14px}
+.stat-lbl{font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+.stat-val{font-size:28px;font-weight:700;font-family:monospace;color:#1a3fa8}
+.stat-sub{font-size:12px;color:#94a3b8;margin-top:3px}
+
+/* Setup screen */
+.setup-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.setup-card{background:white;border:1px solid #e2e8f0;border-radius:16px;padding:40px;max-width:520px;width:100%;text-align:center}
+.setup-icon{font-size:48px;margin-bottom:20px}
+.setup-title{font-size:22px;font-weight:700;margin-bottom:8px}
+.setup-sub{font-size:14px;color:#64748b;margin-bottom:28px;line-height:1.6}
+.bin-id-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;font-family:monospace;font-size:13px;word-break:break-all;margin-bottom:16px;text-align:left;color:#1a3fa8;font-weight:600}
+.step-list{text-align:left;margin-bottom:24px}
+.step-item{display:flex;gap:12px;margin-bottom:12px;font-size:13px;line-height:1.5}
+.step-num{width:24px;height:24px;border-radius:50%;background:#1a3fa8;color:white;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+
+@media(max-width:600px){
+  .body{padding:14px}
+  .g2{grid-template-columns:1fr}
+  .dia-grid{grid-template-columns:repeat(4,1fr)}
+  .hora-grid{grid-template-columns:repeat(4,1fr)}
+  .stat-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const{useState,useEffect,useCallback}=React;
+const h=React.createElement;
+
+// ---- CONFIG ----
+const API_KEY="$2a$10$K/5qgSRLmHUrRRtiYU5D3.BZGNDFWa62lAHpzeHQcA2u5c7IE2vTi";
+const BIN_IDS_KEY="apex_bin_ids_v1";
+const BASE_URL="https://api.jsonbin.io/v3/b";
+
+// ---- JSONBIN API ----
+const createBin=(name,data)=>fetch(BASE_URL,{method:"POST",headers:{"Content-Type":"application/json","X-Master-Key":API_KEY,"X-Bin-Name":name,"X-Private":"false"},body:JSON.stringify(data)}).then(r=>r.json());
+const readBin=id=>fetch(`${BASE_URL}/${id}/latest`,{headers:{"X-Master-Key":API_KEY}}).then(r=>r.json()).then(d=>d.record);
+const updateBin=(id,data)=>fetch(`${BASE_URL}/${id}`,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":API_KEY},body:JSON.stringify(data)}).then(r=>r.json());
+
+// ---- UTILS ----
+const uid=()=>Math.random().toString(36).slice(2,9);
+const cc=c=>c.replace(/\D/g,"");
+const fc=c=>{const n=cc(c).slice(0,8);return n.length>5?`${n.slice(0,5)}-${n.slice(5)}`:n;};
+const DIAS=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+const DIAS_F=["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+const HORAS=["07:00","08:00","09:00","10:00","11:00","13:00","14:00","15:00","16:00","17:00"];
+const ld=(d=new Date())=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const fd=d=>{if(!d)return"";const[y,m,day]=d.split("-");return`${day}/${m}/${y}`;};
+const fmin=m=>{if(!m)return"0 min";if(m<60)return`${m} min`;const hh=Math.floor(m/60),r=m%60;return r?`${hh}h ${r}min`:`${hh}h`;};
+const JANELA=600;
+const DESLOC=60;
+
+// ---- PRODUTOS ----
+const PRODUTOS=[
+  {id:"p01",cat:"Telemetria",nome:"Instalado veículos leves e pesados",min:40},
+  {id:"p02",cat:"Telemetria",nome:"Instalado motos ou maquinários",min:40},
+  {id:"p03",cat:"Telemetria",nome:"Instalado veículos leves bloqueador",min:60},
+  {id:"p04",cat:"Telemetria",nome:"Instalado veículos leves e pesados + CAN",min:60},
+  {id:"p05",cat:"Identificador",nome:"Identificador veículos leves e pesados",min:60},
+  {id:"p06",cat:"Identificador",nome:"Identificador RFID veículos leves e pesados",min:60},
+  {id:"p07",cat:"Identificador",nome:"Identificador RFID + CAN",min:80},
+  {id:"p08",cat:"Identificador",nome:"Identificador + CAN",min:90},
+  {id:"p09",cat:"Trava de Ignição",nome:"Imobilizador veículos leves",min:80},
+  {id:"p10",cat:"Trava de Ignição",nome:"Imobilizador RFID veículos leves",min:80},
+  {id:"p11",cat:"Trava de Ignição",nome:"Imobilizador RFID + CAN",min:90},
+  {id:"p12",cat:"Trava de Ignição",nome:"Imobilizador + CAN",min:100},
+  {id:"p13",cat:"Videotelemetria",nome:"Cobli Cam (2 câmeras)",min:90},
+  {id:"p14",cat:"Videotelemetria",nome:"Cobli Multicam (3 câmeras internas)",min:120},
+  {id:"p15",cat:"Videotelemetria",nome:"Cobli Multicam (2 câmeras + 1 externa)",min:240},
+  {id:"p16",cat:"Videotelemetria",nome:"Cobli Multicam (4 câmeras)",min:240},
+  {id:"p17",cat:"Videotelemetria",nome:"Cobli Multicam (5 câmeras)",min:300},
+];
+const CAT_CLS={Telemetria:"btel",Identificador:"bidf","Trava de Ignição":"btrv",Videotelemetria:"bvid"};
+
+// ---- GEOCODE ----
+const geocode=async q=>{
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:80,messages:[{role:"user",content:`Return ONLY JSON {"lat":NUMBER,"lng":NUMBER} for Brazilian CEP or address: "${q}". Just JSON.`}]})});
+    const d=await r.json();const t=d.content?.[0]?.text||"";const m=t.match(/\{[^}]+\}/);
+    if(!m)return null;const p=JSON.parse(m[0]);
+    return(typeof p.lat==="number"&&typeof p.lng==="number")?p:null;
+  }catch{return null;}
+};
+
+// ---- CAPACITY ----
+const getTecCapacity=(prestador,agendamentos,data)=>{
+  const nTec=prestador.tecnicos||1;
+  const tecs=Array.from({length:nTec},(_,i)=>({id:i+1,label:`Técnico ${i+1}`,minutosUsados:0,ags:[]}));
+  agendamentos.filter(a=>a.prestadorId===prestador.id&&a.data===data&&a.status!=="cancelado").forEach(ag=>{
+    const tIdx=(ag.tecnico||1)-1;
+    if(tecs[tIdx]){tecs[tIdx].minutosUsados+=ag.duracaoTotal;tecs[tIdx].ags.push(ag);}
+  });
+  return tecs.map(t=>({...t,minutosLivres:Math.max(0,JANELA-t.minutosUsados),pct:Math.round(Math.min(100,(t.minutosUsados/JANELA)*100))}));
+};
+const getBestTec=(tecs,dur)=>{const av=tecs.filter(t=>t.minutosLivres>=dur);if(!av.length)return null;return av.sort((a,b)=>a.minutosUsados-b.minutosUsados)[0];};
+const haversine=(lat1,lon1,lat2,lon2)=>{const R=6371,toR=Math.PI/180,dLat=(lat2-lat1)*toR,dLon=(lon2-lon1)*toR,a=Math.sin(dLat/2)**2+Math.cos(lat1*toR)*Math.cos(lat2*toR)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));};
+
+const getAvailableSlots=(prestador,agendamentos,duracao,n=45)=>{
+  const out=[],now=new Date(),seen=new Set();
+  for(let i=1;i<=n;i++){
+    const d=new Date(now);d.setDate(now.getDate()+i);
+    const dow=d.getDay(),ds=ld(d);
+    prestador.slots.filter(s=>s.ativo&&s.dow===dow).forEach(sl=>{
+      const k=`${ds}_${sl.hora}`;if(seen.has(k))return;seen.add(k);
+      const tecs=getTecCapacity(prestador,agendamentos,ds);
+      const best=getBestTec(tecs,duracao);
+      out.push({date:ds,dow,hora:sl.hora,tecDisp:best?best.label:null,full:!best});
+    });
+  }
+  return out;
+};
+
+// ============================================================
+// SETUP SCREEN
+// ============================================================
+function SetupScreen({onReady}){
+  const[status,setStatus]=useState("idle");
+  const[errMsg,setErrMsg]=useState("");
+  const[binIds,setBinIds]=useState(null);
+  const[existingId,setExistingId]=useState("");
+  const[loadingExisting,setLoadingExisting]=useState(false);
+  const[existErr,setExistErr]=useState("");
+
+  const criar=async()=>{
+    setStatus("creating");setErrMsg("");
+    try{
+      const[rp,ra]=await Promise.all([
+        createBin("apex-prestadores",[]),
+        createBin("apex-agendamentos",[])
+      ]);
+      if(rp.error||ra.error)throw new Error(rp.message||ra.message||"Erro da API");
+      if(!rp.metadata?.id||!ra.metadata?.id)throw new Error("Resposta inesperada: "+JSON.stringify(rp).slice(0,100));
+      const ids={prestadores:rp.metadata.id,agendamentos:ra.metadata.id};
+      localStorage.setItem(BIN_IDS_KEY,JSON.stringify(ids));
+      setBinIds(ids);setStatus("done");
+    }catch(e){setErrMsg(e.message||"Erro desconhecido");setStatus("error");}
+  };
+
+  const usarExistente=async()=>{
+    setExistErr("");
+    if(!existingId.trim()){setExistErr("Cole o ID do bin de prestadores");return;}
+    setLoadingExisting(true);
+    try{
+      const stored=JSON.parse(existingId.trim());
+      await readBin(stored.prestadores);
+      localStorage.setItem(BIN_IDS_KEY,JSON.stringify(stored));
+      onReady(stored);
+    }catch{
+      try{
+        await readBin(existingId.trim());
+        setExistErr("Cole o JSON completo com os dois IDs, não só um.");
+      }catch{setExistErr("ID inválido ou inacessível. Verifique e tente novamente.");}
+    }
+    setLoadingExisting(false);
+  };
+
+  if(status==="done"&&binIds)return h("div",{className:"setup-wrap"},
+    h("div",{className:"setup-card"},
+      h("div",{className:"setup-icon"},"✅"),
+      h("div",{className:"setup-title"},"Banco de dados criado!"),
+      h("div",{className:"setup-sub"},"Todos os testadores precisam usar os mesmos IDs abaixo. Copie e compartilhe com quem for testar."),
+      h("div",{className:"bin-id-box"},JSON.stringify(binIds,null,2)),
+      h("button",{style:{marginBottom:12,width:"100%"},onClick:()=>{navigator.clipboard?.writeText(JSON.stringify(binIds))}},"📋 Copiar IDs"),
+      h("div",{className:"step-list"},
+        h("div",{style:{fontWeight:600,fontSize:13,marginBottom:10}},"Como compartilhar com o time:"),
+        [
+          "Copie o JSON acima",
+          "Envie para os testadores pelo WhatsApp ou e-mail",
+          'Cada testador abre o app e clica em "Já tenho IDs"',
+          "Cola o JSON e clica em Conectar — pronto!"
+        ].map((s,i)=>h("div",{key:i,className:"step-item"},h("div",{className:"step-num"},i+1),h("div",null,s)))
+      ),
+      h("button",{className:"bp",style:{width:"100%"},onClick:()=>onReady(binIds)},"Entrar no app →")
+    )
+  );
+
+  if(status==="error")return h("div",{className:"setup-wrap"},
+    h("div",{className:"setup-card"},
+      h("div",{className:"setup-icon"},"❌"),
+      h("div",{className:"setup-title"},"Erro ao criar bins"),
+      h("div",{className:"setup-sub"},"Se estiver abrindo o arquivo localmente (file://), o navegador bloqueia chamadas de API por segurança. Siga as instruções abaixo:"),
+      errMsg&&h("div",{style:{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:8,padding:"10px 14px",fontFamily:"monospace",fontSize:12,marginBottom:16,textAlign:"left",wordBreak:"break-all"}},errMsg),
+      h("div",{className:"step-list",style:{textAlign:"left",marginBottom:20}},
+        h("div",{style:{fontWeight:600,fontSize:13,marginBottom:10}},"Opção 1 — Criar bins manualmente no JSONBin:"),
+        [
+          "Acesse jsonbin.io e faça login",
+          'Clique em "Lixeiras" → "+ Criar Lixeira" → crie uma chamada apex-prestadores com conteúdo []',
+          "Repita e crie outra chamada apex-agendamentos com conteúdo []",
+          "Copie os IDs de cada bin e use o botão abaixo"
+        ].map(function(s,i){return h("div",{key:i,className:"step-item"},h("div",{className:"step-num"},i+1),h("div",null,s));})
+      ),
+      h("div",{style:{display:"flex",gap:8,flexDirection:"column"}},
+        h("button",{className:"bp",onClick:function(){setStatus("existing");setErrMsg("");}},'"Já tenho IDs" — usar bins existentes'),
+        h("button",{onClick:function(){setStatus("idle");setErrMsg("");;}},"← Tentar criar novamente")
+      )
+    )
+  );
+
+  return h("div",{className:"setup-wrap"},
+    h("div",{className:"setup-card"},
+      h("div",{className:"setup-icon"},"🚀"),
+      h("div",{className:"setup-title"},"Cobli APEX"),
+      h("div",{className:"setup-sub"},"Primeira vez? Crie o banco de dados compartilhado. Já testou antes? Use os IDs que recebeu."),
+
+      status==="creating"
+        ?h("div",{style:{display:"flex",flexDirection:"column",alignItems:"center",gap:16,padding:"24px 0"}},
+            h("div",{className:"spinner-lg"}),
+            h("p",{style:{color:"#64748b",fontSize:13}},"Criando banco de dados compartilhado...")
+          )
+        :h("div",null,
+          h("button",{className:"bp",style:{width:"100%",marginBottom:16,padding:"12px"},onClick:criar},"+ Criar banco de dados (primeira vez)"),
+          h("div",{className:"div",style:{margin:"16px 0",position:"relative"}},
+            h("span",{style:{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",background:"white",padding:"0 12px",fontSize:12,color:"#94a3b8"}})
+          ),
+          status!=="existing"
+            ?h("button",{style:{width:"100%",padding:"12px"},onClick:()=>setStatus("existing")},"Já tenho IDs — conectar")
+            :h("div",null,
+              h("div",{className:"fld",style:{textAlign:"left",marginBottom:8}},
+                h("label",{className:"lbl"},"Cole o JSON com os IDs recebidos"),
+                h("textarea",{rows:4,style:{width:"100%",padding:"8px 12px",border:"1px solid #cbd5e1",borderRadius:8,fontFamily:"monospace",fontSize:12,resize:"vertical",outline:"none"},value:existingId,onChange:v=>setExistingId(v.target.value),placeholder:'{\n  "prestadores": "...",\n  "agendamentos": "..."\n}'})
+              ),
+              existErr&&h("div",{className:"alert aerr",style:{marginBottom:10}},existErr),
+              h("button",{className:"bp",style:{width:"100%"},disabled:!existingId.trim()||loadingExisting,onClick:usarExistente},
+                loadingExisting?h(React.Fragment,null,h("div",{className:"spinner"}),"Conectando..."):"Conectar →"
+              )
+            )
+        )
+    )
+  );
+}
+
+// ============================================================
+// WIZARD STEPS
+// ============================================================
+function ProgressBar({step}){
+  const steps=["Dados","Localização","Agenda","Revisão"];
+  return h("div",{className:"progress"},
+    steps.map((s,i)=>{
+      const n=i+1,st=step>n?"done":step===n?"on":"idle";
+      return h("div",{key:i,className:`pstep ${step>n?"done":""}`},
+        h("div",{className:`pdot ${st}`},st==="done"?"✓":n),
+        h("div",{className:`plbl ${st}`},s)
+      );
+    })
+  );
+}
+
+function Step1({data,onChange,onNext}){
+  const[errs,setErrs]=useState({});
+  const set=(k,v)=>onChange({...data,[k]:v});
+  const validate=()=>{
+    const e={};
+    if(!data.nome?.trim())e.nome="Obrigatório";
+    if(!data.cidade)e.cidade="Selecione";
+    if(!data.telefone?.trim())e.telefone="Obrigatório";
+    if(!data.tecnicos||data.tecnicos<1)e.tecnicos="Mínimo 1";
+    setErrs(e);return!Object.keys(e).length;
+  };
+  return h("div",null,
+    h("div",{className:"g2"},
+      h("div",{className:"fld cspan"},h("label",{className:"lbl"},"Nome da empresa *"),h("input",{className:errs.nome?"err":"",value:data.nome||"",onChange:v=>set("nome",v.target.value),placeholder:"Ex: TechInstall São Paulo"}),errs.nome&&h("div",{className:"ferr"},errs.nome)),
+      h("div",{className:"fld"},h("label",{className:"lbl"},"Cidade *"),h("select",{className:errs.cidade?"err":"",value:data.cidade||"",onChange:v=>set("cidade",v.target.value)},h("option",{value:""},"Selecione..."),h("option",{value:"SP"},"São Paulo (SP)"),h("option",{value:"RJ"},"Rio de Janeiro (RJ)")),errs.cidade&&h("div",{className:"ferr"},errs.cidade)),
+      h("div",{className:"fld"},h("label",{className:"lbl"},"Telefone / WhatsApp *"),h("input",{className:errs.telefone?"err":"",value:data.telefone||"",onChange:v=>set("telefone",v.target.value),placeholder:"(11) 99999-9999"}),errs.telefone&&h("div",{className:"ferr"},errs.telefone)),
+      h("div",{className:"fld cspan"},h("label",{className:"lbl"},"E-mail"),h("input",{type:"email",value:data.email||"",onChange:v=>set("email",v.target.value),placeholder:"contato@empresa.com.br"})),
+      h("div",{className:"fld"},
+        h("label",{className:"lbl"},"Número de técnicos *"),
+        h("input",{type:"number",min:1,max:20,className:errs.tecnicos?"err":"",value:data.tecnicos||"",onChange:v=>set("tecnicos",parseInt(v.target.value)||""),placeholder:"Ex: 2"}),
+        errs.tecnicos&&h("div",{className:"ferr"},errs.tecnicos),
+        data.tecnicos>0&&h("div",{style:{marginTop:8,display:"flex",gap:6,flexWrap:"wrap"}},Array.from({length:data.tecnicos},(_,i)=>h("span",{key:i,className:"tec-badge"},`Técnico ${i+1}`)))
+      ),
+      h("div",{className:"fld"},h("label",{className:"lbl"},"Responsável técnico"),h("input",{value:data.responsavel||"",onChange:v=>set("responsavel",v.target.value),placeholder:"Nome do responsável"}))
+    ),
+    h("div",{className:"footer-btns"},h("span"),h("button",{className:"bp",onClick:()=>validate()&&onNext()},"Próximo: Localização →"))
+  );
+}
+
+function Step2({data,onChange,onNext,onBack}){
+  const[cepVal,setCepVal]=useState(data.cep||"");
+  const[loading,setLoading]=useState(false);
+  const[status,setStatus]=useState(data.lat?"ok":null);
+  const set=(k,v)=>onChange({...data,[k]:v});
+  const buscarCep=async()=>{setLoading(true);setStatus(null);const c=await geocode(cc(cepVal).slice(0,8));setLoading(false);if(c){onChange({...data,cep:fc(cepVal),lat:Math.round(c.lat*10000)/10000,lng:Math.round(c.lng*10000)/10000});setStatus("ok");}else setStatus("err");};
+  const buscarEnd=async()=>{if(!data.endereco)return;setLoading(true);setStatus(null);const c=await geocode(data.endereco);setLoading(false);if(c){onChange({...data,lat:Math.round(c.lat*10000)/10000,lng:Math.round(c.lng*10000)/10000});setStatus("ok");}else setStatus("err");};
+  return h("div",null,
+    h("div",{className:"fld"},h("label",{className:"lbl"},"CEP da base"),h("div",{className:"row"},h("input",{style:{fontFamily:"monospace",letterSpacing:2,flex:1,maxWidth:200},value:fc(cepVal),onChange:v=>setCepVal(cc(v.target.value)),onKeyDown:v=>v.key==="Enter"&&cc(cepVal).length>=5&&!loading&&buscarCep(),placeholder:"00000-000",maxLength:9}),h("button",{onClick:buscarCep,disabled:cc(cepVal).length<5||loading},loading?h(React.Fragment,null,h("div",{className:"spinner"}),"Buscando..."):"Localizar CEP"))),
+    h("div",{className:"div",style:{margin:"14px 0"}}),
+    h("div",{className:"fld"},h("label",{className:"lbl"},"Ou endereço completo"),h("div",{className:"row"},h("input",{value:data.endereco||"",onChange:v=>set("endereco",v.target.value),placeholder:"Av. Paulista, 1000, São Paulo SP",style:{flex:1}}),h("button",{onClick:buscarEnd,disabled:!data.endereco||loading},"Geocodificar"))),
+    loading&&h("div",{style:{display:"flex",alignItems:"center",gap:8,fontSize:13,color:"#64748b",marginTop:8}},h("div",{className:"spinner"}),"Buscando..."),
+    !loading&&status==="ok"&&h("div",{className:"geo-ok"},"✓ Localizado — ",h("span",{style:{fontFamily:"monospace",fontSize:12,marginLeft:6}},`${data.lat}, ${data.lng}`)),
+    !loading&&status==="err"&&h("div",{className:"geo-err"},"Não localizei. Insira manualmente:"),
+    (status==="err"||(data.lat&&status!=="ok"))&&h("div",{className:"g2",style:{marginTop:12}},
+      h("div",{className:"fld",style:{margin:0}},h("label",{className:"lbl"},"Latitude"),h("input",{value:data.lat||"",onChange:v=>onChange({...data,lat:parseFloat(v.target.value)||null}),placeholder:"-23.5901",style:{fontFamily:"monospace"}})),
+      h("div",{className:"fld",style:{margin:0}},h("label",{className:"lbl"},"Longitude"),h("input",{value:data.lng||"",onChange:v=>onChange({...data,lng:parseFloat(v.target.value)||null}),placeholder:"-46.6897",style:{fontFamily:"monospace"}}))
+    ),
+    h("p",{className:"coord-hint"},"Dica: Google Maps → botão direito no endereço → copiar coordenadas."),
+    h("div",{className:"div"}),
+    h("div",{className:"fld"},h("label",{className:"lbl"},`Raio de atendimento: ${data.raio||25} km`),h("div",{className:"raio-row"},h("span",{style:{fontSize:12,color:"#64748b"}},"5"),h("input",{type:"range",min:5,max:50,step:5,value:data.raio||25,onChange:v=>set("raio",Number(v.target.value)),style:{flex:1}}),h("span",{style:{fontSize:12,color:"#64748b"}},"50 km"))),
+    h("div",{className:"footer-btns"},h("button",{onClick:onBack},"← Voltar"),h("button",{className:"bp",disabled:!data.lat||!data.lng,onClick:onNext},data.lat&&data.lng?"Próximo: Agenda →":"Geocodifique para continuar"))
+  );
+}
+
+function Step3({data,onChange,onNext,onBack}){
+  const[selDia,setSelDia]=useState(null);
+  const slots=data.slots||[];
+  const toggle=(dow,hora)=>{const ex=slots.find(s=>s.dow===dow&&s.hora===hora);onChange({...data,slots:ex?slots.filter(s=>!(s.dow===dow&&s.hora===hora)):[...slots,{id:uid(),dow,hora,ativo:true}]});};
+  const hDia=dow=>slots.filter(s=>s.dow===dow).map(s=>s.hora).sort();
+  const byDay=DIAS.map((_,i)=>({i,full:DIAS_F[i],hs:hDia(i)})).filter(x=>x.hs.length);
+  return h("div",null,
+    data.tecnicos&&h("div",{className:"alert ainfo",style:{marginBottom:14}},`Capacidade diária: ${data.tecnicos} técnico(s) × 10h = ${fmin(data.tecnicos*JANELA)}`),
+    h("p",{style:{fontSize:13,color:"#64748b",marginBottom:14}},"Selecione os dias e os horários de início disponíveis."),
+    h("div",{className:"dia-grid"},DIAS.map((d,i)=>h("div",{key:i,className:`dia-btn${selDia===i?" on":""}`,onClick:()=>setSelDia(selDia===i?null:i)},d,h("span",{className:"dia-count"},hDia(i).length?`${hDia(i).length}h`:"")))),
+    selDia!==null&&h("div",{className:"card",style:{marginBottom:14}},h("div",{className:"ch"},h("span",{className:"ct"},`Horários — ${DIAS_F[selDia]}`)),h("div",{className:"cb"},h("div",{className:"hora-grid"},HORAS.map(hr=>{const on=!!slots.find(s=>s.dow===selDia&&s.hora===hr);return h("div",{key:hr,className:`hora-btn${on?" on":""}`,onClick:()=>toggle(selDia,hr)},hr);})))),
+    slots.length>0&&h("div",null,h("p",{style:{fontSize:11,fontWeight:600,color:"#64748b",textTransform:"uppercase",letterSpacing:".4px",marginBottom:8}},`${slots.length} slot(s)/semana`),byDay.map(g=>h("div",{key:g.i,className:"slot-row"},h("span",{style:{fontWeight:600,fontSize:13}},g.full),h("div",null,g.hs.map(hr=>h("span",{key:hr,className:"slot-chip"},hr)))))),
+    !slots.length&&h("div",{className:"alert awarn"},"Selecione ao menos um horário."),
+    h("div",{className:"footer-btns"},h("button",{onClick:onBack},"← Voltar"),h("button",{className:"bp",disabled:!slots.length,onClick:onNext},"Revisar →"))
+  );
+}
+
+function Step4({data,onBack,onSave,saving}){
+  const slots=data.slots||[];
+  const byDay=DIAS.map((_,i)=>({i,full:DIAS_F[i],hs:slots.filter(s=>s.dow===i).map(s=>s.hora).sort()})).filter(x=>x.hs.length);
+  return h("div",null,
+    h("div",{className:"rev-section"},h("div",{className:"rev-title"},"Dados básicos"),[["Empresa",data.nome],["Cidade",data.cidade==="SP"?"São Paulo":"Rio de Janeiro"],["Telefone",data.telefone],["E-mail",data.email||"—"],["Técnicos",`${data.tecnicos} (cap. ${fmin((data.tecnicos||1)*JANELA)}/dia)`],["Raio",`${data.raio||25} km`]].map(([k,v])=>h("div",{key:k,className:"rev-row"},h("span",{className:"rev-key"},k),h("span",{className:"rev-val"},v)))),
+    h("div",{className:"rev-section"},h("div",{className:"rev-title"},`Agenda — ${slots.length} slot(s)/semana`),byDay.map(g=>h("div",{key:g.i,className:"rev-row"},h("span",{className:"rev-key"},g.full),h("div",{style:{textAlign:"right"}},g.hs.map(hr=>h("span",{key:hr,className:"slot-chip"},hr)))))),
+    h("div",{className:"footer-btns"},h("button",{onClick:onBack},"← Editar"),h("button",{className:"bp",onClick:onSave,disabled:saving},saving?h(React.Fragment,null,h("div",{className:"spinner"}),"Salvando..."):"✓ Confirmar cadastro"))
+  );
+}
+
+const BLANK={nome:"",cidade:"",telefone:"",email:"",responsavel:"",tecnicos:1,cep:"",endereco:"",lat:null,lng:null,raio:25,slots:[]};
+
+function Wizard({init,onDone,onCancel}){
+  const[step,setStep]=useState(1);
+  const[data,setData]=useState(init?{...BLANK,...init,slots:[...(init.slots||[])]}:{...BLANK});
+  const[saving,setSaving]=useState(false);
+  const handleSave=async()=>{setSaving(true);await new Promise(r=>setTimeout(r,300));onDone({...data,id:data.id||uid()});setSaving(false);};
+  return h("div",null,
+    h("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:22}},
+      h("div",null,h("p",{className:"ptitle"},data.id?"Editar prestador":"Cadastrar prestador"),h("p",{className:"psub"},"4 etapas")),
+      h("button",{onClick:onCancel},"Cancelar")
+    ),
+    h(ProgressBar,{step}),
+    h("div",{className:"card"},
+      h("div",{className:"ch"},h("span",{className:"ct"},[,"Dados básicos","Localização","Agenda","Revisão"][step])),
+      h("div",{className:"cb"},
+        step===1&&h(Step1,{data,onChange:setData,onNext:()=>setStep(2)}),
+        step===2&&h(Step2,{data,onChange:setData,onNext:()=>setStep(3),onBack:()=>setStep(1)}),
+        step===3&&h(Step3,{data,onChange:setData,onNext:()=>setStep(4),onBack:()=>setStep(2)}),
+        step===4&&h(Step4,{data,onBack:()=>setStep(3),onSave:handleSave,saving})
+      )
+    )
+  );
+}
+
+// ============================================================
+// PRODUTO SELECTOR
+// ============================================================
+function ProdutoSelector({itens,onChange}){
+  const[selProd,setSelProd]=useState("");
+  const[qty,setQty]=useState(1);
+  const add=()=>{if(!selProd)return;const prod=PRODUTOS.find(p=>p.id===selProd);if(!prod)return;const ex=itens.find(i=>i.prodId===selProd);if(ex){onChange(itens.map(i=>i.prodId===selProd?{...i,qty:i.qty+qty}:i));}else{onChange([...itens,{prodId:selProd,nome:prod.nome,cat:prod.cat,minPorVeiculo:prod.min,qty}]);}setSelProd("");setQty(1);};
+  const rm=id=>onChange(itens.filter(i=>i.prodId!==id));
+  const upd=(id,q)=>onChange(q<1?itens.filter(i=>i.prodId!==id):itens.map(i=>i.prodId===id?{...i,qty:q}:i));
+  const totalMin=itens.reduce((s,i)=>s+i.minPorVeiculo*i.qty,0);
+  return h("div",null,
+    h("div",{className:"add-prod-row"},
+      h("select",{value:selProd,onChange:v=>setSelProd(v.target.value)},
+        h("option",{value:""},"Selecione o produto..."),
+        ["Telemetria","Identificador","Trava de Ignição","Videotelemetria"].map(cat=>h("optgroup",{key:cat,label:cat},PRODUTOS.filter(p=>p.cat===cat).map(p=>h("option",{key:p.id,value:p.id},`${p.nome} (${fmin(p.min)}/veículo)`))))
+      ),
+      h("div",{style:{display:"flex",alignItems:"center",gap:4}},h("span",{style:{fontSize:12,color:"#64748b",whiteSpace:"nowrap"}},"Qtd:"),h("input",{type:"number",min:1,max:99,value:qty,onChange:v=>setQty(parseInt(v.target.value)||1),className:"qty-input"})),
+      h("button",{onClick:add,disabled:!selProd,className:"bp"},"+ Add")
+    ),
+    itens.length>0&&h("div",null,
+      itens.map(i=>h("div",{key:i.prodId,className:"prod-row"},
+        h("div",null,h("div",{className:"prod-name"},i.nome),h("div",{className:"prod-cat"},h("span",{className:`badge ${CAT_CLS[i.cat]||""}`},i.cat),` · ${fmin(i.minPorVeiculo)}/veículo`)),
+        h("div",{style:{display:"flex",alignItems:"center",gap:4}},h("input",{type:"number",min:1,max:99,value:i.qty,onChange:v=>upd(i.prodId,parseInt(v.target.value)||1),className:"qty-input"})),
+        h("div",{className:"prod-time"},fmin(i.minPorVeiculo*i.qty)),
+        h("button",{className:"bd bsm",onClick:()=>rm(i.prodId)},"✕")
+      )),
+      h("div",{className:"tempo-box",style:{marginTop:12}},
+        h("div",{className:"tempo-total"},fmin(totalMin+DESLOC)),
+        h("div",{style:{fontSize:12,color:"#4ade80",marginTop:4}},`Instalação: ${fmin(totalMin)} + Deslocamento: ${fmin(DESLOC)}`)
+      )
+    ),
+    !itens.length&&h("p",{style:{fontSize:13,color:"#94a3b8",padding:"10px 0"}},"Nenhum produto selecionado.")
+  );
+}
+
+// ============================================================
+// AGENDAMENTO TAB
+// ============================================================
+function AgendaTab({ps,ags,onSave}){
+  const[step,setStep]=useState(1);
+  const[cep,setCep]=useState("");
+  const[geocoding,setGeocoding]=useState(false);
+  const[found,setFound]=useState([]);
+  const[p,setP]=useState(null);
+  const[itens,setItens]=useState([]);
+  const[avail,setAvail]=useState([]);
+  const[sel,setSel]=useState(null);
+  const[cli,setCli]=useState({nome:"",tel:"",end:""});
+  const[agente,setAgente]=useState("");
+  const[err,setErr]=useState("");
+
+  const totalMin=itens.reduce((s,i)=>s+i.minPorVeiculo*i.qty,0);
+  const duracaoTotal=totalMin+DESLOC;
+
+  const buscar=async()=>{
+    setErr("");setGeocoding(true);
+    const coords=await geocode(cc(cep).slice(0,8));setGeocoding(false);
+    if(!coords){setErr("CEP não localizado.");return;}
+    const nearby=ps.filter(x=>x.lat&&x.lng).map(x=>({...x,dist:Math.round(haversine(coords.lat,coords.lng,x.lat,x.lng)*10)/10})).filter(x=>x.dist<=(x.raio||25)).sort((a,b)=>a.dist-b.dist);
+    if(!nearby.length){setErr("Nenhum prestador APEX atende esse CEP. Use o fluxo convencional.");return;}
+    setFound(nearby);
+    if(nearby.length===1){setP(nearby[0]);setStep(2);}else setStep(1.5);
+  };
+
+  const selectP=px=>{setP(px);setStep(2);};
+
+  const calcSlots=()=>{
+    if(!itens.length){setErr("Adicione ao menos um produto.");return;}
+    setAvail(getAvailableSlots(p,ags,duracaoTotal).slice(0,30));setStep(3);
+  };
+
+  const confirmar=async()=>{
+    if(!cli.nome||!cli.tel){setErr("Preencha nome e telefone.");return;}
+    const tecs=getTecCapacity(p,ags,sel.date);
+    const best=getBestTec(tecs,duracaoTotal);
+    if(!best){setErr("Capacidade esgotada. Escolha outro slot.");return;}
+    await onSave({id:uid(),prestadorId:p.id,prestadorNome:p.nome,cidade:p.cidade,data:sel.date,hora:sel.hora,tecnico:best.id,duracaoTotal,itens,cep:fc(cep),dist:p.dist,cliente:cli,agente,status:"confirmado",criadoEm:new Date().toISOString()});
+    setStep(5);
+  };
+
+  const reset=()=>{setStep(1);setCep("");setFound([]);setP(null);setItens([]);setAvail([]);setSel(null);setCli({nome:"",tel:"",end:""});setAgente("");setErr("");};
+
+  return h("div",null,
+    h("p",{className:"ptitle"},"Novo Agendamento"),
+    h("p",{className:"psub"},"Fluxo APEX — confirmação no primeiro contato"),
+
+    step===1&&h("div",{className:"card"},h("div",{className:"ch"},h("span",{className:"ct"},"Localização do cliente")),h("div",{className:"cb"},
+      err&&h("div",{className:"alert aerr"},err),
+      h("div",{className:"fld"},h("label",{className:"lbl"},"CEP do endereço de instalação"),h("div",{className:"row"},h("input",{style:{fontFamily:"monospace",fontSize:18,letterSpacing:3,textAlign:"center",flex:1},placeholder:"00000-000",value:fc(cep),onChange:v=>setCep(cc(v.target.value)),onKeyDown:v=>v.key==="Enter"&&cep.length>=5&&!geocoding&&buscar(),maxLength:9}),h("button",{className:"bp",onClick:buscar,disabled:cep.length<5||geocoding},geocoding?h(React.Fragment,null,h("div",{className:"spinner"}),"Localizando..."):"Buscar →")))
+    )),
+
+    step===1.5&&h("div",null,
+      h("div",{className:"alert ainfo"},`${found.length} prestadores cobrem esse CEP:`),
+      found.map(px=>h("div",{key:px.id,style:{border:"1px solid #e2e8f0",borderRadius:10,padding:"12px 16px",marginBottom:8,cursor:"pointer",background:"white"},onClick:()=>selectP(px)},
+        h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
+          h("div",null,h("div",{style:{fontWeight:600,fontSize:14}},px.nome),h("div",{style:{fontSize:12,color:"#64748b",marginTop:3}},h("span",{className:`badge ${px.cidade==="SP"?"bsp":"brj"}`},px.cidade),` · ${px.tecnicos||1} técnico(s)`)),
+          h("span",{style:{fontFamily:"monospace",fontWeight:700,color:"#1a3fa8"}},`${px.dist} km`)
+        )
+      )),
+      h("button",{onClick:()=>setStep(1)},"← Voltar")
+    ),
+
+    step===2&&h("div",null,
+      h("div",{className:"alert aok"},`${p.nome} · ${p.dist} km · ${p.tecnicos||1} técnico(s) · cap. ${fmin((p.tecnicos||1)*JANELA)}/dia`),
+      h("div",{className:"card"},h("div",{className:"ch"},h("span",{className:"ct"},"Produtos e veículos")),h("div",{className:"cb"},err&&h("div",{className:"alert aerr"},err),h(ProdutoSelector,{itens,onChange:setItens}))),
+      h("div",{style:{display:"flex",gap:8}},h("button",{onClick:()=>{found.length>1?setStep(1.5):setStep(1);setErr("");}},"← Voltar"),h("button",{className:"bp",disabled:!itens.length,onClick:calcSlots},"Ver slots →"))
+    ),
+
+    step===3&&h("div",null,
+      h("div",{className:"alert ainfo"},`Tempo total: ${fmin(duracaoTotal)} (${fmin(totalMin)} instalação + ${fmin(DESLOC)} deslocamento)`),
+      h("div",{className:"card"},h("div",{className:"ch"},h("span",{className:"ct"},"Slots disponíveis"),h("span",{style:{fontSize:12,color:"#64748b"}},`${avail.filter(s=>!s.full).length} disponíveis`)),h("div",{className:"cb"},
+        avail.length===0?h("p",{style:{color:"#64748b",textAlign:"center",padding:24}},"Sem disponibilidade nos próximos 45 dias."):
+        h("div",{className:"slot-grid"},avail.map((sl,i)=>h("div",{key:i,className:`scard${sl.full?" full":""}${sel&&sel.date===sl.date&&sel.hora===sl.hora?" sel":""}`,onClick:()=>!sl.full&&setSel(sl)},
+          h("div",{className:"sd"},fd(sl.date)),h("div",{className:"sdy"},DIAS[sl.dow]),h("div",{className:"sh"},sl.hora),h("div",{className:"sc"},sl.full?"Sem cap.":sl.tecDisp)
+        )))
+      )),
+      h("div",{style:{display:"flex",gap:8}},h("button",{onClick:()=>setStep(2)},"← Voltar"),h("button",{className:"bp",disabled:!sel,onClick:()=>setStep(4)},"Continuar →"))
+    ),
+
+    step===4&&h("div",null,
+      h("div",{className:"alert ainfo"},`${fd(sel.date)} (${DIAS[sel.dow]}) às ${sel.hora} · ${sel.tecDisp} · ${fmin(duracaoTotal)}`),
+      h("div",{className:"card"},h("div",{className:"ch"},h("span",{className:"ct"},"Dados do cliente")),h("div",{className:"cb"},
+        err&&h("div",{className:"alert aerr"},err),
+        h("div",{className:"g2"},
+          h("div",{className:"fld"},h("label",{className:"lbl"},"Nome *"),h("input",{value:cli.nome,onChange:v=>setCli({...cli,nome:v.target.value}),placeholder:"Nome ou empresa"})),
+          h("div",{className:"fld"},h("label",{className:"lbl"},"Telefone *"),h("input",{value:cli.tel,onChange:v=>setCli({...cli,tel:v.target.value}),placeholder:"(11) 99999-9999"})),
+          h("div",{className:"fld cspan"},h("label",{className:"lbl"},"Endereço de instalação"),h("input",{value:cli.end,onChange:v=>setCli({...cli,end:v.target.value}),placeholder:"Rua, número, complemento"}))
+        ),
+        h("div",{className:"div"}),
+        h("div",{className:"fld"},h("label",{className:"lbl"},"Agente responsável"),h("input",{value:agente,onChange:v=>setAgente(v.target.value),placeholder:"Seu nome"}))
+      )),
+      h("div",{style:{display:"flex",gap:8}},h("button",{onClick:()=>setStep(3)},"← Voltar"),h("button",{className:"bs",onClick:confirmar},"✓ Confirmar Agendamento"))
+    ),
+
+    step===5&&h("div",{className:"card"},h("div",{className:"cb",style:{textAlign:"center",padding:48}},
+      h("div",{style:{width:56,height:56,borderRadius:"50%",background:"#d1fae5",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",fontSize:24,color:"#059669"}},"✓"),
+      h("div",{style:{fontSize:20,fontWeight:700,marginBottom:8}},"Agendamento confirmado!"),
+      h("p",{style:{color:"#64748b",marginBottom:4}},`${cli.nome} · ${fd(sel.date)} às ${sel.hora}`),
+      h("p",{style:{color:"#94a3b8",marginBottom:24}},`${p.nome} · ${sel.tecDisp} · ${fmin(duracaoTotal)}`),
+      h("button",{className:"bp",onClick:reset},"Novo agendamento")
+    ))
+  );
+}
+
+// ============================================================
+// PRESTADORES TAB
+// ============================================================
+function PrestTab({ps,ags,onSave}){
+  const[view,setView]=useState("list");
+  const[editing,setEditing]=useState(null);
+  const[lastSaved,setLastSaved]=useState(null);
+  const handleDone=p=>{onSave(ps.find(x=>x.id===p.id)?ps.map(x=>x.id===p.id?p:x):[...ps,p]);setLastSaved(p);setEditing(null);setView("success");};
+  const handleDel=id=>{if(!confirm("Remover este prestador?"))return;onSave(ps.filter(x=>x.id!==id));};
+
+  if(view==="wizard")return h(Wizard,{init:editing,onDone:handleDone,onCancel:()=>setView("list")});
+  if(view==="success")return h("div",{style:{textAlign:"center",padding:"56px 24px"}},
+    h("div",{style:{width:56,height:56,borderRadius:"50%",background:"#d1fae5",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 18px",fontSize:24,color:"#059669"}},"✓"),
+    h("div",{style:{fontSize:20,fontWeight:700,marginBottom:8}},"Prestador salvo!"),
+    h("p",{style:{color:"#64748b",marginBottom:4}},lastSaved?.nome),
+    h("p",{style:{color:"#94a3b8",marginBottom:24}},`${lastSaved?.cidade} · ${lastSaved?.tecnicos||1} técnico(s) · raio ${lastSaved?.raio||25} km`),
+    h("div",{style:{display:"flex",gap:10,justifyContent:"center"}},
+      h("button",{onClick:()=>{setEditing(null);setView("wizard");}},"+ Cadastrar outro"),
+      h("button",{className:"bp",onClick:()=>setView("list")},"Ver lista")
+    )
+  );
+
+  return h("div",null,
+    h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:22}},
+      h("div",null,h("p",{className:"ptitle"},"Prestadores APEX"),h("p",{className:"psub"},`${ps.length} prestador(es) · ${ps.reduce((s,p)=>s+(p.tecnicos||1),0)} técnico(s) no total`)),
+      h("button",{className:"bp",onClick:()=>{setEditing(null);setView("wizard");}},"+ Novo prestador")
+    ),
+    ps.length===0?h("div",{className:"empty"},h("div",{className:"empty-icon"},"⚙"),h("p",{style:{fontWeight:600,marginBottom:6}},"Nenhum prestador cadastrado"),h("p",{style:{fontSize:13}},'Clique em "+ Novo prestador" para começar.')):
+    ps.map(p=>h("div",{key:p.id,className:"pc"},
+      h("div",{style:{display:"flex",alignItems:"center",gap:14,minWidth:0}},
+        h("div",{style:{width:42,height:42,borderRadius:10,background:"#f1f5f9",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}},"⚙"),
+        h("div",{style:{minWidth:0}},
+          h("div",{style:{fontWeight:700,fontSize:14,marginBottom:4}},p.nome),
+          h("div",{style:{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap",fontSize:12,color:"#64748b"}},
+            h("span",{className:`badge ${p.cidade==="SP"?"bsp":"brj"}`},p.cidade),
+            h("span",{className:"badge bgeo"},`raio ${p.raio||25} km`),
+            h("span",{className:"tec-badge"},`${p.tecnicos||1} técnico(s)`),
+            `${(p.slots||[]).length} slots/sem`
+          )
+        )
+      ),
+      h("div",{style:{display:"flex",gap:6,flexShrink:0}},
+        h("button",{className:"bsm",onClick:()=>{setEditing(p);setView("wizard");}},"Editar"),
+        h("button",{className:"bsm bd",onClick:()=>handleDel(p.id)},"Remover")
+      )
+    ))
+  );
+}
+
+// ============================================================
+// PAINEL TAB
+// ============================================================
+function PainelTab({ps,ags,onUpdAg}){
+  const[dataFiltro,setDataFiltro]=useState(ld());
+  const[fci,setFci]=useState("todos");
+  const dayAgs=ags.filter(a=>a.data===dataFiltro&&a.status!=="cancelado"&&(fci==="todos"||a.cidade===fci));
+  const totalGeral=ags.filter(a=>a.status!=="cancelado").length;
+  return h("div",null,
+    h("p",{className:"ptitle"},"Painel APEX"),
+    h("p",{className:"psub"},"Ocupação por técnico e agendamentos"),
+    h("div",{className:"stat-grid"},
+      [{l:"Hoje",v:dayAgs.length,s:"nessa data"},{l:"Total",v:totalGeral,s:"confirmados"},{l:"Prestadores",v:ps.length,s:"ativos"},{l:"Técnicos",v:ps.reduce((s,p)=>s+(p.tecnicos||1),0),s:"no total"}]
+        .map((s,i)=>h("div",{key:i,className:"stat-card"},h("div",{className:"stat-lbl"},s.l),h("div",{className:"stat-val"},s.v),h("div",{className:"stat-sub"},s.s)))
+    ),
+    h("div",{style:{display:"flex",gap:10,marginBottom:18,alignItems:"center",flexWrap:"wrap"}},
+      h("div",{style:{display:"flex",alignItems:"center",gap:6}},h("label",{className:"lbl",style:{margin:0}},"Data:"),h("input",{type:"date",value:dataFiltro,onChange:v=>setDataFiltro(v.target.value),style:{width:"auto"}})),
+      h("select",{value:fci,onChange:v=>setFci(v.target.value),style:{width:"auto"}},h("option",{value:"todos"},"SP + RJ"),h("option",{value:"SP"},"São Paulo"),h("option",{value:"RJ"},"Rio de Janeiro"))
+    ),
+    ps.filter(p=>fci==="todos"||p.cidade===fci).map(p=>{
+      const tecs=getTecCapacity(p,ags,dataFiltro);
+      const pAgs=dayAgs.filter(a=>a.prestadorId===p.id);
+      return h("div",{key:p.id,className:"card",style:{marginBottom:14}},
+        h("div",{className:"ch"},h("span",{className:"ct"},p.nome),h("span",{style:{fontSize:12,color:"#64748b"}},`${p.tecnicos||1} técnico(s) · cap. ${fmin((p.tecnicos||1)*JANELA)}/dia`)),
+        h("div",{className:"cb"},
+          tecs.map(t=>{
+            const tAgs=pAgs.filter(a=>a.tecnico===t.id);
+            return h("div",{key:t.id,className:"tec-card"},
+              h("div",{className:"tec-header"},h("span",{className:"tec-title"},t.label),h("span",{className:"tec-pct"},`${fmin(t.minutosUsados)} / 10h (${t.pct}%)`)),
+              h("div",{className:"progress-bar"},h("div",{className:`progress-fill${t.pct>=100?" full":t.pct>=80?" warn":""}`,style:{width:`${Math.min(100,t.pct)}%`}})),
+              tAgs.length===0?h("p",{style:{fontSize:12,color:"#94a3b8"}},"Sem agendamentos"):
+              tAgs.sort((a,b)=>a.hora.localeCompare(b.hora)).map(a=>h("div",{key:a.id,className:"ag-item"},
+                h("span",{className:"ag-time"},a.hora),
+                h("div",{className:"ag-info"},
+                  h("div",{className:"ag-client"},a.cliente?.nome||"—"),
+                  h("div",{className:"ag-detail"},[fmin(a.duracaoTotal),"CEP "+a.cep,a.itens&&a.itens.length?a.itens.map(function(i){return i.qty+"x "+i.nome.split(" ").slice(0,3).join(" ");}).join(", "):null].filter(Boolean).join(" · "))
+                ),
+                a.status!=="cancelado"&&h("button",{className:"bsm bd",onClick:()=>{if(!confirm("Cancelar?"))return;onUpdAg({...a,status:"cancelado"});}},
+                  "Cancelar"
+                )
+              ))
+            );
+          })
+        )
+      );
+    }),
+    dayAgs.length===0&&h("div",{className:"empty",style:{background:"white",borderRadius:12,border:"1px solid #e2e8f0"}},
+      h("div",{className:"empty-icon"},"📅"),
+      h("p",{style:{fontWeight:600,marginBottom:6}},"Sem agendamentos nessa data")
+    )
+  );
+}
+
+// ============================================================
+// APP
+// ============================================================
+function App(){
+  const[binIds,setBinIds]=useState(null);
+  const[ready,setReady]=useState(false);
+  const[ps,setPs]=useState([]);
+  const[ags,setAgs]=useState([]);
+  const[tab,setTab]=useState("agenda");
+  const[syncing,setSyncing]=useState(false);
+
+  useEffect(()=>{
+    const stored=localStorage.getItem(BIN_IDS_KEY);
+    if(stored)try{setBinIds(JSON.parse(stored));setReady(true);}catch{}
+  },[]);
+
+  useEffect(()=>{
+    if(!ready||!binIds)return;
+    const fetchData=async()=>{
+      setSyncing(true);
+      try{
+        const[p,a]=await Promise.all([readBin(binIds.prestadores),readBin(binIds.agendamentos)]);
+        setPs(Array.isArray(p)?p:[]);
+        setAgs(Array.isArray(a)?a:[]);
+      }catch{}
+      setSyncing(false);
+    };
+    fetchData();
+    const iv=setInterval(fetchData,30000);
+    return()=>clearInterval(iv);
+  },[ready,binIds]);
+
+  const savPs=async novo=>{setPs(novo);try{await updateBin(binIds.prestadores,novo);}catch{}};
+  const savAgs=async novo=>{setAgs(novo);try{await updateBin(binIds.agendamentos,novo);}catch{}};
+  const addAg=async a=>{const novo=[...ags,a];await savAgs(novo);};
+  const updAg=async u=>{await savAgs(ags.map(a=>a.id===u.id?u:a));};
+
+  const handleSetupReady=ids=>{setBinIds(ids);setReady(true);};
+
+  if(!ready)return h(SetupScreen,{onReady:handleSetupReady});
+
+  const TABS=[{k:"agenda",l:"Agendamento"},{k:"prest",l:"Prestadores"},{k:"painel",l:"Painel"}];
+
+  return h("div",null,
+    h("header",{className:"hdr"},
+      h("div",{className:"hdr-logo"},"Cobli",h("span",{className:"hdr-tag"},"APEX")),
+      h("div",{style:{display:"flex",alignItems:"center",gap:12}},
+        syncing&&h("div",{style:{display:"flex",alignItems:"center",gap:6,fontSize:12,opacity:.7}},h("div",{className:"spinner"}),"Sincronizando..."),
+        h("span",{className:"hdr-sub"},"Agenda Prestadores de Excelência"),
+        h("button",{style:{background:"rgba(255,255,255,.15)",border:"none",color:"white",fontSize:12,padding:"4px 10px",borderRadius:6,cursor:"pointer"},onClick:()=>{localStorage.removeItem(BIN_IDS_KEY);window.location.reload();}},"Sair")
+      )
+    ),
+    h("nav",{className:"nav-bar"},TABS.map(t=>h("button",{key:t.k,className:`nb${tab===t.k?" on":""}`,onClick:()=>setTab(t.k)},t.l))),
+    h("div",{className:"body"},
+      tab==="agenda"&&h(AgendaTab,{ps,ags,onSave:addAg}),
+      tab==="prest"&&h(PrestTab,{ps,ags,onSave:savPs}),
+      tab==="painel"&&h(PainelTab,{ps,ags,onUpdAg:updAg})
+    )
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(h(App));
+</script>
+</body>
+</html>
