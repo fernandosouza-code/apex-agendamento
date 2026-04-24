@@ -175,6 +175,7 @@ const h=React.createElement;
 // ---- CONFIG ----
 const API_KEY="$2a$10$K/5qgSRLmHUrRRtiYU5D3.BZGNDFWa62lAHpzeHQcA2u5c7IE2vTi";
 const BIN_IDS_KEY="apex_bin_ids_v1";
+const DEFAULT_BIN_IDS={"prestadores":"69eb7fb8aaba88219732f85b","agendamentos":"69eb801336566621a8e960f8"};
 const BASE_URL="https://api.jsonbin.io/v3/b";
 
 // ---- JSONBIN API ----
@@ -791,7 +792,13 @@ function App(){
 
   useEffect(()=>{
     const stored=localStorage.getItem(BIN_IDS_KEY);
-    if(stored)try{setBinIds(JSON.parse(stored));setReady(true);}catch{}
+    if(stored){
+      try{setBinIds(JSON.parse(stored));setReady(true);return;}catch{}
+    }
+    // Auto-connect with default shared bins
+    localStorage.setItem(BIN_IDS_KEY,JSON.stringify(DEFAULT_BIN_IDS));
+    setBinIds(DEFAULT_BIN_IDS);
+    setReady(true);
   },[]);
 
   useEffect(()=>{
