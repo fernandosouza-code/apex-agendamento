@@ -181,8 +181,18 @@ const BASE_URL="https://api.jsonbin.io/v3/b";
 const createBin=(name,data)=>fetch(BASE_URL,{method:"POST",headers:{"Content-Type":"application/json","X-Master-Key":API_KEY,"X-Bin-Name":name,"X-Private":"false"},body:JSON.stringify({records:data,_initialized:true})}).then(r=>r.json());
 const readBinRecords=async id=>{const d=await readBin(id);return Array.isArray(d)?d:(d&&Array.isArray(d.records)?d.records:[]);};
 const updateBinRecords=(id,data)=>updateBin(id,{records:data,_initialized:true});
-const readBin=id=>fetch(`${BASE_URL}/${id}/latest`,{headers:{"X-Master-Key":API_KEY}}).then(r=>r.json()).then(d=>d.record);
-const updateBin=(id,data)=>fetch(`${BASE_URL}/${id}`,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":API_KEY},body:JSON.stringify(data)}).then(r=>r.json());
+const readBin=async id=>{
+  const r=await fetch(`${BASE_URL}/${id}/latest`,{headers:{"X-Master-Key":API_KEY,"X-Bin-Meta":"false"}});
+  const d=await r.json();
+  console.log("readBin",id,"status:",r.status,"data:",JSON.stringify(d).slice(0,100));
+  return d.record!==undefined?d.record:d;
+};
+const updateBin=async(id,data)=>{
+  const r=await fetch(`${BASE_URL}/${id}`,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":API_KEY},body:JSON.stringify(data)});
+  const d=await r.json();
+  console.log("updateBin",id,"status:",r.status,"resp:",JSON.stringify(d).slice(0,100));
+  return d;
+};
 
 // ---- UTILS ----
 const uid=()=>Math.random().toString(36).slice(2,9);
@@ -804,17 +814,21 @@ function App(){
     setPs(novo);
     try{
       const r=await updateBinRecords(binIds.prestadores,novo);
-      if(r.error){setSaveErr("Erro ao salvar prestador: "+r.message);return;}
+      console.log("savPs resp:",JSON.stringify(r).slice(0,200));
+      if(r&&r.error){setSaveErr("Erro ao salvar: "+JSON.stringify(r));return;}
+      if(!r||!r.metadata){setSaveErr("Resposta inesperada ao salvar: "+JSON.stringify(r).slice(0,150));return;}
       setSaveErr("");
-    }catch(e){setSaveErr("Falha de conexão ao salvar. Tente novamente.");}
+    }catch(e){setSaveErr("Exceção: "+e.message);}
   };
   const savAgs=async novo=>{
     setAgs(novo);
     try{
       const r=await updateBinRecords(binIds.agendamentos,novo);
-      if(r.error){setSaveErr("Erro ao salvar agendamento: "+r.message);return;}
+      console.log("savAgs resp:",JSON.stringify(r).slice(0,200));
+      if(r&&r.error){setSaveErr("Erro ao salvar: "+JSON.stringify(r));return;}
+      if(!r||!r.metadata){setSaveErr("Resposta inesperada ao salvar: "+JSON.stringify(r).slice(0,150));return;}
       setSaveErr("");
-    }catch(e){setSaveErr("Falha de conexão ao salvar. Tente novamente.");}
+    }catch(e){setSaveErr("Exceção: "+e.message);}
   };
   const addAg=async a=>{const novo=[...ags,a];await savAgs(novo);};
   const updAg=async u=>{await savAgs(ags.map(a=>a.id===u.id?u:a));};
