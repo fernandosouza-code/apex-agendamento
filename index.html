@@ -178,7 +178,9 @@ const BIN_IDS_KEY="apex_bin_ids_v1";
 const BASE_URL="https://api.jsonbin.io/v3/b";
 
 // ---- JSONBIN API ----
-const createBin=(name,data)=>fetch(BASE_URL,{method:"POST",headers:{"Content-Type":"application/json","X-Master-Key":API_KEY,"X-Bin-Name":name,"X-Private":"false"},body:JSON.stringify(data)}).then(r=>r.json());
+const createBin=(name,data)=>fetch(BASE_URL,{method:"POST",headers:{"Content-Type":"application/json","X-Master-Key":API_KEY,"X-Bin-Name":name,"X-Private":"false"},body:JSON.stringify({records:data,_initialized:true})}).then(r=>r.json());
+const readBinRecords=async id=>{const d=await readBin(id);return Array.isArray(d)?d:(d&&Array.isArray(d.records)?d.records:[]);};
+const updateBinRecords=(id,data)=>updateBin(id,{records:data,_initialized:true});
 const readBin=id=>fetch(`${BASE_URL}/${id}/latest`,{headers:{"X-Master-Key":API_KEY}}).then(r=>r.json()).then(d=>d.record);
 const updateBin=(id,data)=>fetch(`${BASE_URL}/${id}`,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":API_KEY},body:JSON.stringify(data)}).then(r=>r.json());
 
@@ -787,7 +789,7 @@ function App(){
     const fetchData=async()=>{
       setSyncing(true);
       try{
-        const[p,a]=await Promise.all([readBin(binIds.prestadores),readBin(binIds.agendamentos)]);
+        const[p,a]=await Promise.all([readBinRecords(binIds.prestadores),readBinRecords(binIds.agendamentos)]);
         setPs(Array.isArray(p)?p:[]);
         setAgs(Array.isArray(a)?a:[]);
       }catch{}
@@ -801,7 +803,7 @@ function App(){
   const savPs=async novo=>{
     setPs(novo);
     try{
-      const r=await updateBin(binIds.prestadores,novo);
+      const r=await updateBinRecords(binIds.prestadores,novo);
       if(r.error){setSaveErr("Erro ao salvar prestador: "+r.message);return;}
       setSaveErr("");
     }catch(e){setSaveErr("Falha de conexão ao salvar. Tente novamente.");}
@@ -809,7 +811,7 @@ function App(){
   const savAgs=async novo=>{
     setAgs(novo);
     try{
-      const r=await updateBin(binIds.agendamentos,novo);
+      const r=await updateBinRecords(binIds.agendamentos,novo);
       if(r.error){setSaveErr("Erro ao salvar agendamento: "+r.message);return;}
       setSaveErr("");
     }catch(e){setSaveErr("Falha de conexão ao salvar. Tente novamente.");}
