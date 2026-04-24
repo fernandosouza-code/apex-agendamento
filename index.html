@@ -791,11 +791,7 @@ function App(){
   const[showIds,setShowIds]=useState(false);
 
   useEffect(()=>{
-    const stored=localStorage.getItem(BIN_IDS_KEY);
-    if(stored){
-      try{setBinIds(JSON.parse(stored));setReady(true);return;}catch{}
-    }
-    // Auto-connect with default shared bins
+    // Always use DEFAULT_BIN_IDS — overwrite whatever is in localStorage
     localStorage.setItem(BIN_IDS_KEY,JSON.stringify(DEFAULT_BIN_IDS));
     setBinIds(DEFAULT_BIN_IDS);
     setReady(true);
