@@ -218,13 +218,35 @@ const PRODUTOS=[
 const CAT_CLS={Telemetria:"btel",Identificador:"bidf","Trava de Ignição":"btrv",Videotelemetria:"bvid"};
 
 // ---- GEOCODE ----
-const geocode=async q=>{
+// Geocode by CEP using ViaCEP + Nominatim (OpenStreetMap)
+const geocodeCEP=async cep=>{
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:80,messages:[{role:"user",content:`Return ONLY JSON {"lat":NUMBER,"lng":NUMBER} for Brazilian CEP or address: "${q}". Just JSON.`}]})});
-    const d=await r.json();const t=d.content?.[0]?.text||"";const m=t.match(/\{[^}]+\}/);
-    if(!m)return null;const p=JSON.parse(m[0]);
-    return(typeof p.lat==="number"&&typeof p.lng==="number")?p:null;
+    const v=await fetch("https://viacep.com.br/ws/"+cep+"/json/").then(r=>r.json());
+    if(v.erro)return null;
+    const addr=encodeURIComponent([v.logradouro,v.bairro,v.localidade,v.uf,"Brasil"].filter(Boolean).join(", "));
+    const n=await fetch("https://nominatim.openstreetmap.org/search?q="+addr+"&format=json&limit=1",{headers:{"Accept-Language":"pt-BR"}}).then(r=>r.json());
+    if(n&&n[0])return{lat:parseFloat(n[0].lat),lng:parseFloat(n[0].lon)};
+    // fallback: search just city
+    const city=encodeURIComponent(v.localidade+", "+v.uf+", Brasil");
+    const n2=await fetch("https://nominatim.openstreetmap.org/search?q="+city+"&format=json&limit=1").then(r=>r.json());
+    if(n2&&n2[0])return{lat:parseFloat(n2[0].lat),lng:parseFloat(n2[0].lon)};
+    return null;
   }catch{return null;}
+};
+
+// Geocode by address using Nominatim
+const geocodeAddress=async addr=>{
+  try{
+    const q=encodeURIComponent(addr+", Brasil");
+    const n=await fetch("https://nominatim.openstreetmap.org/search?q="+q+"&format=json&limit=1",{headers:{"Accept-Language":"pt-BR"}}).then(r=>r.json());
+    if(n&&n[0])return{lat:parseFloat(n[0].lat),lng:parseFloat(n[0].lon)};
+    return null;
+  }catch{return null;}
+};
+
+const geocode=async q=>{
+  const isCep=/^\d{5}-?\d{3}$/.test(q.trim())||/^\d{8}$/.test(q.trim());
+  return isCep?geocodeCEP(q.replace(/\D/g,"")):geocodeAddress(q);
 };
 
 // ---- CAPACITY ----
@@ -424,8 +446,8 @@ function Step2({data,onChange,onNext,onBack}){
   const[loading,setLoading]=useState(false);
   const[status,setStatus]=useState(data.lat?"ok":null);
   const set=(k,v)=>onChange({...data,[k]:v});
-  const buscarCep=async()=>{setLoading(true);setStatus(null);const c=await geocode(cc(cepVal).slice(0,8));setLoading(false);if(c){onChange({...data,cep:fc(cepVal),lat:Math.round(c.lat*10000)/10000,lng:Math.round(c.lng*10000)/10000});setStatus("ok");}else setStatus("err");};
-  const buscarEnd=async()=>{if(!data.endereco)return;setLoading(true);setStatus(null);const c=await geocode(data.endereco);setLoading(false);if(c){onChange({...data,lat:Math.round(c.lat*10000)/10000,lng:Math.round(c.lng*10000)/10000});setStatus("ok");}else setStatus("err");};
+  const buscarCep=async()=>{setLoading(true);setStatus(null);const c=await geocodeCEP(cc(cepVal).slice(0,8));setLoading(false);if(c){onChange({...data,cep:fc(cepVal),lat:Math.round(c.lat*10000)/10000,lng:Math.round(c.lng*10000)/10000});setStatus("ok");}else setStatus("err");};
+  const buscarEnd=async()=>{if(!data.endereco)return;setLoading(true);setStatus(null);const c=await geocodeAddress(data.endereco);setLoading(false);if(c){onChange({...data,lat:Math.round(c.lat*10000)/10000,lng:Math.round(c.lng*10000)/10000});setStatus("ok");}else setStatus("err");};
   return h("div",null,
     h("div",{className:"fld"},h("label",{className:"lbl"},"CEP da base"),h("div",{className:"row"},h("input",{style:{fontFamily:"monospace",letterSpacing:2,flex:1,maxWidth:200},value:fc(cepVal),onChange:v=>setCepVal(cc(v.target.value)),onKeyDown:v=>v.key==="Enter"&&cc(cepVal).length>=5&&!loading&&buscarCep(),placeholder:"00000-000",maxLength:9}),h("button",{onClick:buscarCep,disabled:cc(cepVal).length<5||loading},loading?h(React.Fragment,null,h("div",{className:"spinner"}),"Buscando..."):"Localizar CEP"))),
     h("div",{className:"div",style:{margin:"14px 0"}}),
@@ -552,7 +574,7 @@ function AgendaTab({ps,ags,onSave}){
 
   const buscar=async()=>{
     setErr("");setGeocoding(true);
-    const coords=await geocode(cc(cep).slice(0,8));setGeocoding(false);
+    const coords=await geocodeCEP(cc(cep).slice(0,8));setGeocoding(false);
     if(!coords){setErr("CEP não localizado.");return;}
     const nearby=ps.filter(x=>x.lat&&x.lng).map(x=>({...x,dist:Math.round(haversine(coords.lat,coords.lng,x.lat,x.lng)*10)/10})).filter(x=>x.dist<=(x.raio||25)).sort((a,b)=>a.dist-b.dist);
     if(!nearby.length){setErr("Nenhum prestador APEX atende esse CEP. Use o fluxo convencional.");return;}
